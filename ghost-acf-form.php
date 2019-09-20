@@ -126,6 +126,7 @@ function GhostACFForm_after_save_post( $post_id ) {
 	$headers .= 'From: ' . $name . ' <' . $email . '>' . "\r\n";
 	$subject = "New submission for form '" . $ghost_acf_form_name . "' from " . $name . " <".$email.">";
 
+	//Load in email html header from template
 	$body = file_get_contents(__DIR__ . '/email-templates/email-header.html');
 
 	$body .= "<h2><strong>" . $ghost_acf_form_name . "</strong> - New submission</h2>\r\n";
@@ -153,9 +154,10 @@ function GhostACFForm_after_save_post( $post_id ) {
 		</tbody>
 	</table>'; //Buttons in emails are awful!
 
+	//Load in email html footer from template
 	$body .= file_get_contents(__DIR__ . '/email-templates/email-footer.html');
 
-    // send email
+	// send email
 	$result = wp_mail($ghost_acf_form_email_to, $subject, $body, $headers );
 
 	return $post_id;
