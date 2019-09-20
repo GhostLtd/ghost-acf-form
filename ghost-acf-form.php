@@ -81,7 +81,7 @@ function GhostACFForm_after_save_post( $post_id ) {
     if( get_post_type($post_id) !== 'ghost-form-entry' ) {
         return $post_id;
 	}
-	
+
 	//We don't need to run this if we're in the admin area
 	if( is_admin() ) {
 		return $post_id;
@@ -89,12 +89,12 @@ function GhostACFForm_after_save_post( $post_id ) {
 
 	//Get form and title
 	if(session_id() == '') {
-		session_start(); 
+		session_start();
 	}
 	$ghost_acf_form_key = $_SESSION['ghost_acf_form_key'];
 	$form = acf_get_field_group($ghost_acf_form_key);
-	$ghost_acf_form_name = $form['title'];	
-	
+	$ghost_acf_form_name = $form['title'];
+
     // Get custom fields (field group exists for content_form)
     $first_name = get_field('first_name', $post_id);
     $last_name = get_field('last_name', $post_id);
@@ -107,25 +107,25 @@ function GhostACFForm_after_save_post( $post_id ) {
     $title              = $ghost_acf_form_name . ' | ' . $name . ' - ' . $email;
     $data['post_title'] = $title;
     $data['post_name']  = sanitize_title( $title );
-	wp_update_post( $data );	
+	wp_update_post( $data );
 
-	// Update post with the form ID it was created by	
+	// Update post with the form ID it was created by
 	update_post_meta( $post_id, 'form_key', $ghost_acf_form_key);
-    
+
 	//Get email to address as set by shortcode
 	$ghost_acf_form_email_to = $_SESSION['ghost_acf_form_email_to'];
-	
+
 	//Check if emails are disabled by shortcode
 	$email_disabled = $_SESSION['ghost_acf_form_email_disabled'];
 	if($email_disabled == true || $email_disabled == "true" || $email_disabled == "1") {
 		return;
 	}
-	
+
 	//Put together email
     $headers = 'Content-Type: text/html; charset=UTF-8'. "\r\n";
     $headers .= 'From: ' . $name . ' <' . $email . '>' . "\r\n";
 	$subject = "New submission for form '" . $ghost_acf_form_name . "' from " . $name . " <".$email.">";
-	
+
 	$body = file_get_contents(__DIR__ . '/email-templates/email-header.html');
 
 	$body .= "<h2><strong>" . $ghost_acf_form_name . "</strong> - New submission</h2>\r\n";
@@ -136,7 +136,7 @@ function GhostACFForm_after_save_post( $post_id ) {
         $body .= "<strong>Message:</strong><br />\r\n";
 		$body .= nl2br(strip_tags(str_replace("<br />","\n", str_replace("<br>", "\n", $message))));
 		$body .= "<br /><br />\n";
-	}		
+	}
 	$body .= '<table class="btn btn-primary" border="0" cellspacing="0" cellpadding="0">
 		<tbody>
 			<tr>
@@ -152,7 +152,7 @@ function GhostACFForm_after_save_post( $post_id ) {
 			</tr>
 		</tbody>
 	</table>';
-	
+
 	$body .= file_get_contents(__DIR__ . '/email-templates/email-footer.html');
 
     // send email
@@ -176,7 +176,7 @@ add_action( 'wp', 'GhostACFForm_enqueue_acf_form', 15 );
 
 //Shortcode
 function GhostACFForm_shortcode( $atts ) {
-	
+
 	if( is_admin() || wp_doing_ajax() )
 	return;
 
@@ -191,7 +191,7 @@ function GhostACFForm_shortcode( $atts ) {
 	if(empty($form_name)) {
 		return;
 	}
-	
+
 	$forms = acf_get_field_groups(array('post_type' => 'ghost-form-entry'));
 
 	foreach($forms as $form) {
@@ -199,7 +199,7 @@ function GhostACFForm_shortcode( $atts ) {
 		if($form['title'] == $form_name) {
 			//Save the form args in memory to save into the post
 			if(session_id() == '') {
-				session_start(); 
+				session_start();
 			}
 			$_SESSION['ghost_acf_form_key'] = $form['key'];
 			$_SESSION['ghost_acf_form_email_to'] = $args['email_to'];
@@ -208,7 +208,7 @@ function GhostACFForm_shortcode( $atts ) {
 			//Render the form
 			return GhostACFForm_render_form($form);
 		}
-	}	
+	}
 }
 add_shortcode( 'ghost_acf_form', 'GhostACFForm_shortcode' );
 
@@ -226,7 +226,7 @@ function GhostACFForm_render_form($form) {
 			case 'last_name':
 			case 'email':
 				$checked_fields++;
-				break;			
+				break;
 		}
 	}
 	if($checked_fields != 3) {
@@ -235,7 +235,7 @@ function GhostACFForm_render_form($form) {
 
 	$output = "";
 	$output .= '<div id="ghost-acf-form">';
-    
+
     $sent = !empty($_GET['entry']) && $_GET['entry'] == "confirmed";
     if(!$sent) {
 		ob_start();
@@ -275,15 +275,15 @@ function GhostACFForm_select_form($groups) {
 	if(!is_admin()) {
 		return $groups;
 	}
-	
+
 	if(get_current_screen()->id != 'ghost-form-entry') {
 		return $groups;
 	}
 
 	global $post;
-	
-	$form_key = get_post_meta( $post->ID, 'form_key', true );	
-	
+
+	$form_key = get_post_meta( $post->ID, 'form_key', true );
+
 	if(empty($form_key)) {
 		return $groups;
 	}
@@ -293,7 +293,7 @@ function GhostACFForm_select_form($groups) {
 				return array($group);
 			}
 		}
-	}	
+	}
 }
 add_filter('acf/get_field_groups', 'GhostACFForm_select_form');
 
