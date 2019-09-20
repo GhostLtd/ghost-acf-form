@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Ghost ACF Forms
-Description: Frontend forms using ACF
+Description: Render one or more ACF forms on the front end of your website using shortcodes
 Version: 1.0
 Author: Ghost (Digital) Limited
 Author URI: http://ghostlimited.com
